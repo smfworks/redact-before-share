@@ -307,7 +307,7 @@ a:hover {
 
 textarea {
   width: 100%;
-  min-height: 280px;
+  min-height: 200px;
   resize: vertical;
   border: 1px solid var(--line);
   border-radius: 12px;
