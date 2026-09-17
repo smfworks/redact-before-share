@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smfworks/redact-before-share/schema/redact-before-share.schema.json",
+  "title": "Redact Before Share receipt",
+  "description": "Printed output of a client-side heuristic redaction. Values of secrets are never included.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "heuristic",
+    "redactedAt",
+    "total",
+    "categories",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "redact-before-share/v1" },
+    "id": {
+      "type": "string",
+      "pattern": "^RB-[0-9A-F]{4}$"
+    },
+    "heuristic": { "const": true },
+    "redactedAt": { "type": "string", "format": "date-time" },
+    "originalLength": { "type": "integer", "minimum": 0 },
+    "total": { "type": "integer", "minimum": 0 },
+    "enabled": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "token_prefix",
+          "bearer",
+          "aws",
+          "assignment",
+          "email",
+          "phone",
+          "card",
+          "private_ip"
+        ]
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "count", "placeholders"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "count": { "type": "integer", "minimum": 1 },
+          "placeholders": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "summary": { "type": "string" }
+  }
+}
