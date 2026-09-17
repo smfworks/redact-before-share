@@ -1,0 +1,21 @@
+# Cursor session · FAKE DEMO SECRETS — not real credentials
+
+user: ship the LAR hardening PR
+assistant: opening the repo. I will not publish .env.
+
+[tool: Shell]
+$ export OPENAI_API_KEY=sk-test-FAKESECRET_a2b3c4d5e6f7g8h9i0j1
+$ export GITHUB_TOKEN=ghp_demoFakeTokenNotReal000111222333444
+$ git push origin cursor/lar-hardening
+
+user: ping me at alex.demo@smfworks.example if it fails
+
+assistant: noted. I will not. Also found this in the log:
+
+password=demo-not-a-real-password-99
+
+[tool: Read] .env.example
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+# End of fake transcript. Do not treat these as live secrets.

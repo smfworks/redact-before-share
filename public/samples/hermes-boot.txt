@@ -1,0 +1,13 @@
+# Hermes-on-Omarchy boot · FAKE DEMO SECRETS — not real credentials
+
+[tool: journalctl] ollama.service
+Started user unit. Healthcheck 200 from 10.0.0.42:11434
+peer 192.168.1.20 also up. loopback 127.0.0.1 ignored for humans.
+
+[tool: curl]
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJzbWZ3b3Jrcy1sYWIifQ.fakeDemoSignatureNotReal
+X-Internal-Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoib3BzLWRlbW8ifQ.anotherFakeSigXX
+
+assistant: local boot succeeded. I will not paste the bearer into a gist.
+
+# End of fake transcript. Private IPs are optional — toggle the chip.
