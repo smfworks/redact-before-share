@@ -10,6 +10,7 @@ import { Header } from "./components/Header";
 import { PreviewPanes } from "./components/PreviewPanes";
 import { ReceiptCard } from "./components/ReceiptCard";
 import { SisterStrip } from "./components/SisterStrip";
+import { HandoffBanner } from "./components/HandoffBanner";
 import { Toast } from "./components/Toast";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent } from "react";
@@ -176,7 +177,8 @@ export default function App() {
     <div className="page">
       <div className="ambient" aria-hidden="true" />
       <Header />
-      <SisterStrip current="redact-before-share" />
+      <SisterStrip current="redact-before-share" payload={result?.redacted || raw} />
+      <HandoffBanner onPaste={(text) => { setRaw(text); setSampleId(null); }} />
       <main className="layout">
         <div className="left-col">
           <Composer

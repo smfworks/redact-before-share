@@ -8,6 +8,8 @@ export type CategoryId =
   | "email"
   | "phone"
   | "card"
+  | "iban"
+  | "national_id"
   | "private_ip";
 
 export type PreviewView = "original" | "redacted" | "split";

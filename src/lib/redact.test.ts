@@ -153,6 +153,23 @@ describe("cards", () => {
   });
 });
 
+describe("IBAN / national IDs", () => {
+  it("redacts a checksum-valid IBAN and a dashed SSN", () => {
+    const source = "pay GB82 WEST 1234 5698 7654 32 ssn 856-45-6789";
+    const result = redact(source, defaultEnabled(), NOW);
+    assert.ok(result.redacted.includes("[REDACTED_IBAN]"));
+    assert.ok(result.redacted.includes("[REDACTED_ID]"));
+    assert.equal(result.redacted.includes("GB82"), false);
+    assert.equal(result.redacted.includes("856-45-6789"), false);
+  });
+
+  it("leaves a checksum-invalid IBAN", () => {
+    const source = "acct GB00 WEST 0000 0000 0000 00";
+    const result = redact(source, defaultEnabled(), NOW);
+    assert.ok(result.redacted.includes("GB00 WEST 0000 0000 0000 00"));
+  });
+});
+
 describe("xAI / service-account prefixes", () => {
   it("redacts xai- and sk-svcacct- keys", () => {
     const source = [

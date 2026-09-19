@@ -9,7 +9,7 @@
   --rose: #f43f5e;
   --lime: #4ade80;
   --ink: #e8edf7;
-  --muted: #8b95ad;
+  --muted: #c5cde0;
   --line: rgba(0, 212, 255, 0.16);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Space Grotesk", "Inter", sans-serif;
@@ -906,4 +906,19 @@ body.shot-og textarea {
 
 body.shot-og .preview-pre {
   max-height: 160px;
+}
+
+
+.handoff-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--cyan);
+  border-radius: 12px;
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--ink);
+  font-size: 13px;
 }
