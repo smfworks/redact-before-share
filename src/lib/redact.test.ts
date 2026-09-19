@@ -145,6 +145,25 @@ describe("cards", () => {
     const result = redact(source, defaultEnabled(), NOW);
     assert.equal(result.redacted.includes("1234567890123456"), true);
   });
+
+  it("does not treat a non-Luhn grouped run as a card", () => {
+    const source = "invoice 1234 5678 9012 3456";
+    const result = redact(source, defaultEnabled(), NOW);
+    assert.equal(result.redacted.includes("1234 5678 9012 3456"), true);
+  });
+});
+
+describe("xAI / service-account prefixes", () => {
+  it("redacts xai- and sk-svcacct- keys", () => {
+    const source = [
+      "xai-abcdefghijklmnopqrstuvwxyz0123456789ABCD",
+      "sk-svcacct-abcdefghijklmnopqrstuvwxyz012345",
+    ].join("\n");
+    const result = redact(source, defaultEnabled(), NOW);
+    assert.ok(result.redacted.includes("[REDACTED_API_KEY]"));
+    assert.equal(result.redacted.includes("xai-abcdefghijklmnopqrstuvwxyz0123456789ABCD"), false);
+    assert.equal(result.redacted.includes("sk-svcacct-"), false);
+  });
 });
 
 describe("private IPs", () => {

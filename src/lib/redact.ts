@@ -30,11 +30,17 @@ interface Pattern {
   group?: number;
 }
 
+/** Keep token prefixes in sync with skill-lint/src/lib/secrets.ts. */
 const TOKEN_PATTERNS: Pattern[] = [
   {
     category: "token_prefix",
     placeholder: "[REDACTED_API_KEY]",
-    regex: /\bsk-(?:live|test|proj|ant|admin)?-?[A-Za-z0-9_]{12,}\b/g,
+    regex: /\bsk-(?:svcacct|live|test|proj|ant|admin)?-?[A-Za-z0-9_-]{12,}\b/g,
+  },
+  {
+    category: "token_prefix",
+    placeholder: "[REDACTED_API_KEY]",
+    regex: /\bxai-[A-Za-z0-9_-]{20,}\b/g,
   },
   {
     category: "token_prefix",
@@ -148,6 +154,7 @@ function findCards(source: string): Hit[] {
   while ((match = grouped.exec(source))) {
     const digits = match[0].replace(/\D/g, "");
     if (digits.length < 13 || digits.length > 19) continue;
+    if (!luhn(digits)) continue;
     hits.push({
       category: "card",
       placeholder: "[REDACTED_CARD]",

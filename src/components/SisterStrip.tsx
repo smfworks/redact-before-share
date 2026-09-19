@@ -1,41 +1,51 @@
-export function SisterStrip() {
+import { KIT_NEXT, VIRAL_KIT, type ViralKitId } from "../data/kit";
+
+interface SisterStripProps {
+  current: ViralKitId;
+}
+
+export function SisterStrip({ current }: SisterStripProps) {
+  const nextIds = KIT_NEXT[current] ?? [];
+  const next = nextIds
+    .map((id) => VIRAL_KIT.find((item) => item.id === id))
+    .filter((item): item is (typeof VIRAL_KIT)[number] => Boolean(item));
+
   return (
-    <nav className="sisters" aria-label="SMF Works viral kit">
-      <a href="https://github.com/smfworks/paste-to-skill" rel="noreferrer" target="_blank">
-        <span>01</span>
-        <strong>Paste → Skill</strong>
-        <small>create</small>
-      </a>
-      <a href="https://github.com/smfworks/skill-card" rel="noreferrer" target="_blank">
-        <span>02</span>
-        <strong>Skill Card</strong>
-        <small>one-pager</small>
-      </a>
-      <a href="https://github.com/smfworks/skill-lint" rel="noreferrer" target="_blank">
-        <span>03</span>
-        <strong>Skill Lint</strong>
-        <small>grade / fix</small>
-      </a>
-      <a href="https://github.com/smfworks/refuse-card" rel="noreferrer" target="_blank">
-        <span>04</span>
-        <strong>Refuse Card</strong>
-        <small>the gate</small>
-      </a>
-      <a href="https://github.com/smfworks/agent-receipt" rel="noreferrer" target="_blank">
-        <span>05</span>
-        <strong>Agent Receipt</strong>
-        <small>what ran</small>
-      </a>
-      <a href="https://github.com/smfworks/prompt-diff" rel="noreferrer" target="_blank">
-        <span>06</span>
-        <strong>Prompt Diff</strong>
-        <small>what changed</small>
-      </a>
-      <span className="sisters-current">
-        <span>07</span>
-        <strong>Redact Before Share</strong>
-        <small>scrub</small>
-      </span>
-    </nav>
+    <div className="kit-nav">
+      <nav className="sisters" aria-label="SMF Works viral kit">
+        {VIRAL_KIT.map((item, index) => {
+          const n = String(index + 1).padStart(2, "0");
+          if (item.id === current) {
+            return (
+              <span className="sisters-current" key={item.id} aria-current="page">
+                <span>{n}</span>
+                <strong>{item.label}</strong>
+                <small>{item.blurb}</small>
+              </span>
+            );
+          }
+          return (
+            <a href={item.demo} rel="noreferrer" target="_blank" key={item.id}>
+              <span>{n}</span>
+              <strong>{item.label}</strong>
+              <small>{item.blurb}</small>
+            </a>
+          );
+        })}
+      </nav>
+      {next.length ? (
+        <p className="kit-next">
+          Next in the kit:{" "}
+          {next.map((item, index) => (
+            <span key={item.id}>
+              {index > 0 ? " · " : null}
+              <a href={item.demo} rel="noreferrer" target="_blank">
+                {item.label}
+              </a>
+            </span>
+          ))}
+        </p>
+      ) : null}
+    </div>
   );
 }
