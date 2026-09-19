@@ -8,6 +8,7 @@ import type {
   TextSegment,
 } from "../types.ts";
 import { SCHEMA_VERSION } from "../types.ts";
+import { findTokenHits, type TokenKind } from "./kit-tokens.ts";
 
 const PRIORITY: Record<CategoryId, number> = {
   token_prefix: 0,
@@ -15,9 +16,24 @@ const PRIORITY: Record<CategoryId, number> = {
   bearer: 2,
   assignment: 3,
   card: 4,
-  email: 5,
-  phone: 6,
-  private_ip: 7,
+  iban: 5,
+  national_id: 6,
+  email: 7,
+  phone: 8,
+  private_ip: 9,
+};
+
+const TOKEN_KIND_CATEGORY: Record<TokenKind, CategoryId> = {
+  "sk-token": "token_prefix",
+  "xai-token": "token_prefix",
+  "github-pat": "token_prefix",
+  slack: "token_prefix",
+  "npm-token": "token_prefix",
+  "google-key": "token_prefix",
+  "private-key": "token_prefix",
+  "aws-key": "aws",
+  bearer: "bearer",
+  jwt: "bearer",
 };
 
 const SKIP_VALUE =
@@ -30,59 +46,7 @@ interface Pattern {
   group?: number;
 }
 
-/** Keep token prefixes in sync with skill-lint/src/lib/secrets.ts. */
 const TOKEN_PATTERNS: Pattern[] = [
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_API_KEY]",
-    regex: /\bsk-(?:svcacct|live|test|proj|ant|admin)?-?[A-Za-z0-9_-]{12,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_API_KEY]",
-    regex: /\bxai-[A-Za-z0-9_-]{20,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_GITHUB_TOKEN]",
-    regex: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_GITHUB_TOKEN]",
-    regex: /\bgithub_pat_[A-Za-z0-9_]{20,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_SLACK_TOKEN]",
-    regex: /\bxox[baprs]-[\dA-Za-z_-]{10,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_API_KEY]",
-    regex: /\bnpm_[A-Za-z0-9]{20,}\b/g,
-  },
-  {
-    category: "token_prefix",
-    placeholder: "[REDACTED_API_KEY]",
-    regex: /\bAIza[0-9A-Za-z_-]{20,}\b/g,
-  },
-  {
-    category: "aws",
-    placeholder: "[REDACTED_AWS_KEY]",
-    regex: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g,
-  },
-  {
-    category: "bearer",
-    placeholder: "[REDACTED_BEARER]",
-    regex: /\bBearer\s+([A-Za-z0-9._\-+=/]{20,})/gi,
-    group: 1,
-  },
-  {
-    category: "bearer",
-    placeholder: "[REDACTED_JWT]",
-    regex: /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
-  },
   {
     category: "assignment",
     placeholder: "[REDACTED_SECRET]",
@@ -99,6 +63,16 @@ const TOKEN_PATTERNS: Pattern[] = [
 
 function collectRegexHits(source: string, enabled: EnabledMap): Hit[] {
   const hits: Hit[] = [];
+  for (const token of findTokenHits(source)) {
+    const category = TOKEN_KIND_CATEGORY[token.kind];
+    if (!enabled[category]) continue;
+    hits.push({
+      category,
+      placeholder: token.placeholder,
+      start: token.start,
+      end: token.end,
+    });
+  }
   for (const pattern of TOKEN_PATTERNS) {
     if (!enabled[pattern.category]) continue;
     pattern.regex.lastIndex = 0;
@@ -181,6 +155,7 @@ function findPhones(source: string): Hit[] {
     /\+\d{1,3}[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
     /\(\d{3}\)[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
     /\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/g,
+    /\+\d{8,15}\b/g,
   ];
   for (const regex of patterns) {
     let match: RegExpExecArray | null;
@@ -310,9 +285,66 @@ function summarize(total: number, categories: CategoryCount[]): string {
   return `Scrubbed ${total} item${total === 1 ? "" : "s"} across ${kinds} categor${kinds === 1 ? "y" : "ies"}.`;
 }
 
+function ibanChecksum(iban: string): boolean {
+  const compact = iban.replace(/\s+/g, "").toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(compact)) return false;
+  const rearranged = compact.slice(4) + compact.slice(0, 4);
+  let expanded = "";
+  for (const ch of rearranged) {
+    expanded += /[A-Z]/.test(ch) ? String(ch.charCodeAt(0) - 55) : ch;
+  }
+  let rest = 0;
+  for (const ch of expanded) {
+    rest = (rest * 10 + Number(ch)) % 97;
+  }
+  return rest === 1;
+}
+
+function findIbans(source: string): Hit[] {
+  const hits: Hit[] = [];
+  const regex = /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,4})?\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(source))) {
+    if (!ibanChecksum(match[0])) continue;
+    hits.push({
+      category: "iban",
+      placeholder: "[REDACTED_IBAN]",
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+  return hits;
+}
+
+function findNationalIds(source: string): Hit[] {
+  const hits: Hit[] = [];
+  const ssn = /\b(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = ssn.exec(source))) {
+    hits.push({
+      category: "national_id",
+      placeholder: "[REDACTED_ID]",
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+  const nino = /\b[A-CEGHJ-PR-TW-Z]{2}\d{6}[A-D]\b/gi;
+  while ((match = nino.exec(source))) {
+    hits.push({
+      category: "national_id",
+      placeholder: "[REDACTED_ID]",
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+  return hits;
+}
+
 export function findHits(source: string, enabled: EnabledMap): Hit[] {
   const hits = collectRegexHits(source, enabled);
   if (enabled.card) hits.push(...findCards(source));
+  if (enabled.iban) hits.push(...findIbans(source));
+  if (enabled.national_id) hits.push(...findNationalIds(source));
   if (enabled.phone) hits.push(...findPhones(source));
   if (enabled.private_ip) hits.push(...findPrivateIps(source));
   return mergeHits(hits);
