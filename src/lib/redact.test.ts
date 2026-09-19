@@ -154,13 +154,15 @@ describe("cards", () => {
 });
 
 describe("IBAN / national IDs", () => {
-  it("redacts a checksum-valid IBAN and a dashed SSN", () => {
+  it("redacts a checksum-valid IBAN; national IDs stay off by default", () => {
     const source = "pay GB82 WEST 1234 5698 7654 32 ssn 856-45-6789";
-    const result = redact(source, defaultEnabled(), NOW);
-    assert.ok(result.redacted.includes("[REDACTED_IBAN]"));
-    assert.ok(result.redacted.includes("[REDACTED_ID]"));
-    assert.equal(result.redacted.includes("GB82"), false);
-    assert.equal(result.redacted.includes("856-45-6789"), false);
+    const off = redact(source, defaultEnabled(), NOW);
+    assert.ok(off.redacted.includes("[REDACTED_IBAN]"));
+    assert.equal(off.redacted.includes("GB82"), false);
+    assert.ok(off.redacted.includes("856-45-6789"));
+    const on = redact(source, { ...defaultEnabled(), national_id: true }, NOW);
+    assert.ok(on.redacted.includes("[REDACTED_ID]"));
+    assert.equal(on.redacted.includes("856-45-6789"), false);
   });
 
   it("leaves a checksum-invalid IBAN", () => {

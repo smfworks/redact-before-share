@@ -177,8 +177,8 @@ export default function App() {
     <div className="page">
       <div className="ambient" aria-hidden="true" />
       <Header />
-      <SisterStrip current="redact-before-share" payload={result?.redacted || raw} />
-      <HandoffBanner onPaste={(text) => { setRaw(text); setSampleId(null); }} />
+      <SisterStrip current="redact-before-share" payload={result?.redacted || raw} kind="redacted-text" />
+      <HandoffBanner accept={["redacted-text", "plain", "session-json", "skill-md"]} onPaste={(text) => { setRaw(text); setSampleId(null); }} />
       <main className="layout">
         <div className="left-col">
           <Composer
