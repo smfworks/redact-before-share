@@ -70,8 +70,8 @@ export const CATEGORIES: CategoryDef[] = [
     label: "National IDs",
     short: "SSN · NINO",
     placeholder: "[REDACTED_ID]",
-    defaultOn: true,
-    blurb: "US SSN (###-##-####) and UK NINO",
+    defaultOn: false,
+    blurb: "US SSN (###-##-####) and UK NINO — off by default (NINO has no checksum)",
   },
   {
     id: "private_ip",

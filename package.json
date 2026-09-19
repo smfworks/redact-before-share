@@ -20,6 +20,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "vendor:secrets": "node scripts/vendor-kit-tokens.mjs",
     "test": "node --experimental-strip-types --test src/lib/redact.test.ts src/lib/share.test.ts"
   },
   "dependencies": {

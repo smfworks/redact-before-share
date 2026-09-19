@@ -922,3 +922,9 @@ body.shot-og .preview-pre {
   color: var(--ink);
   font-size: 13px;
 }
+
+
+.handoff-error {
+  color: var(--ember-soft);
+  font-size: 12px;
+}
