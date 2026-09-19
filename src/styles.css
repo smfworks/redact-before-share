@@ -125,6 +125,8 @@ a:hover {
   font-size: 15px;
 }
 
+.kit-nav { margin-bottom: 24px; }
+
 .sisters {
   display: flex;
   flex-wrap: wrap;

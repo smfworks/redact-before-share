@@ -176,7 +176,7 @@ export default function App() {
     <div className="page">
       <div className="ambient" aria-hidden="true" />
       <Header />
-      <SisterStrip />
+      <SisterStrip current="redact-before-share" />
       <main className="layout">
         <div className="left-col">
           <Composer
@@ -264,6 +264,9 @@ export default function App() {
           {" — what changed."}
         </p>
         <p>Intelligence is abundant. Judgment is the product.</p>
+        <p>
+          Heuristic scrubber (US-ish phones, Luhn cards, known token prefixes). Not an audit.
+        </p>
         <p>
           MIT · Built by{" "}
           <a href="https://smfworks.com" rel="noreferrer" target="_blank">
